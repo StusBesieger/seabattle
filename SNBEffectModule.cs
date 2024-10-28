@@ -32,11 +32,12 @@ namespace StusNavalSpace
 	public class SNBEffectBehaviour : BlockModuleBehaviour<SNBEffectModule>
     {
 		public MKey EndEffectKey;
-
+		public Transform effectposition;
 		public GameObject EffectPrefab;
 		public GameObject EffectObject;
 		public ParticleSystem Effectparticlesystem;
 		public ParticleSystem EndEffectparticlesystem;
+		private AdTransformValues EffectPosition = new AdTransformValues();
 		public override void OnSimulateStart()  //シミュ開始時
         {
 			//爆発エフェクトを取得・子オブジェクトとして初期化
@@ -44,10 +45,59 @@ namespace StusNavalSpace
 			EffectObject = (GameObject)Instantiate(EffectPrefab, transform);
 			Effectparticlesystem = EffectObject.GetComponent<ParticleSystem>();
 			Effectparticlesystem.Stop();
-			EffectObject.transform.position = ;
+			EffectObject.transform.position = EffectPosition.Position;
+			EffectObject.transform.rotation = EffectPosition.Rotation;
+
 		}
 	}
 
+	public class AdTransformValues
+	{
+
+		public void SetOnTransform(Transform t)
+		{
+			t.localPosition = this.Position;
+			t.localRotation = Quaternion.Euler(this.Rotation);
+			bool flag = this.hasScale;
+			if (flag)
+			{
+				t.localScale = this.Scale;
+			}
+		}
+
+
+		public void FlipTransform()
+		{
+			this.Position.x = -1f * this.Position.x;
+			this.Rotation.y = -1f * this.Rotation.y;
+			this.Scale.x = -1f * this.Scale.x;
+		}
+
+		public static implicit operator AdTransformValues(TransformValues transformV)
+		{
+			Modding.Serialization.Vector3 position = transformV.Position;
+			Modding.Serialization.Vector3 rotation = transformV.Rotation;
+			Modding.Serialization.Vector3 scale = transformV.Scale;
+			return new AdTransformValues
+			{
+				Position = position,
+				Rotation = rotation,
+				Scale = scale
+			};
+		}
+
+		// Token: 0x040003A7 RID: 935
+		public Modding.Serialization.Vector3 Position;
+
+		// Token: 0x040003A8 RID: 936
+		public Modding.Serialization.Vector3 Rotation;
+
+		// Token: 0x040003A9 RID: 937
+		public Modding.Serialization.Vector3 Scale;
+
+		// Token: 0x040003AA RID: 938
+		private bool hasScale = true;
+	}
 
 
 }
