@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections;
 using System.Linq;
 using System.Text;
 using System.Xml.Serialization;
@@ -31,6 +32,7 @@ namespace StusNavalSpace
 	}
 	public class SNBEffectBehaviour : BlockModuleBehaviour<SNBEffectModule>
     {
+		public int blockID;
 		public MKey EndEffectKey;
 		public Transform effectposition;
 		public GameObject EffectPrefab;
@@ -65,23 +67,25 @@ namespace StusNavalSpace
         public override void SafeAwake()
         {
             base.SafeAwake();
-            try
+			blockID = BlockId;
+			try
             {
 				EndEffectKey = GetKey(Module.EndEffectKey);
             }
             catch
             {
-				Mod.Error("BlockID" + BlockId + "error");
+				Mod.Error("BlockID" + blockID + "error");
             }
         }
 
-        public void SimulateUpdate()
+        public IEnumerator SimulateUpdate()
         {
 			bool flag = !this.Effectparticlesystem.isPlaying;
 			if(flag)
             {
 				this.Effectparticlesystem.Play();
             }
+			yield return new WaitForSeconds(1f);
 			bool isPlaying = this.Effectparticlesystem.isPlaying;
 			if(isPlaying)
             {
@@ -91,9 +95,9 @@ namespace StusNavalSpace
 			if (EndEffectKey.IsPressed || EndEffectKey.EmulationPressed())
 			{
 				EndEffectparticlesystem.Play();
-
+				yield return new WaitForSeconds(2f);
 				EndEffectparticlesystem.Stop();
-				}
+			}
 
 		}
 		
