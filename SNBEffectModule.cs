@@ -35,69 +35,67 @@ namespace StusNavalSpace
 		public Transform effectposition;
 		public GameObject EffectPrefab;
 		public GameObject EffectObject;
+		public GameObject EndEffectPrefab;
+		public GameObject EndEffectObject;
 		public ParticleSystem Effectparticlesystem;
 		public ParticleSystem EndEffectparticlesystem;
 		private AdTransformValues EffectPosition = new AdTransformValues();
 		public override void OnSimulateStart()  //シミュ開始時
         {
-			//爆発エフェクトを取得・子オブジェクトとして初期化
-			EffectPrefab = Mod.modAssetBundle.LoadAsset<GameObject>("HPexplosion");
+			//常時発生するエフェクトを取得・子オブジェクトとして初期化
+			EffectPrefab = Mod.modAssetBundle.LoadAsset<GameObject>("UsuallyEffect");
 			EffectObject = (GameObject)Instantiate(EffectPrefab, transform);
 			Effectparticlesystem = EffectObject.GetComponent<ParticleSystem>();
 			Effectparticlesystem.Stop();
-			EffectObject.transform.position = EffectPosition.Position;
-			EffectObject.transform.rotation = EffectPosition.Rotation;
+			EffectObject.transform.localPosition = EffectPosition.Position;
+			EffectObject.transform.localEulerAngles = EffectPosition.Rotation;
+			EffectObject.transform.localScale = EffectPosition.Scale;
+
+			//終了時に発生するエフェクトを取得・子オブジェクトとして初期化
+			EndEffectPrefab = Mod.modAssetBundle.LoadAsset<GameObject>("EndEffect");
+			EndEffectObject = (GameObject)Instantiate(EndEffectPrefab, transform);
+			EndEffectparticlesystem = EndEffectObject.GetComponent<ParticleSystem>();
+			EndEffectparticlesystem.Stop();
+			EndEffectObject.transform.localPosition = EffectPosition.Position;
+			EndEffectObject.transform.localEulerAngles = EffectPosition.Rotation;
+			EndEffectObject.transform.localScale = EffectPosition.Scale;
+
 
 		}
-	}
+        public override void SafeAwake()
+        {
+            base.SafeAwake();
+            try
+            {
+				EndEffectKey = GetKey(Module.EndEffectKey);
+            }
+            catch
+            {
+				Mod.Error("BlockID" + BlockId + "error");
+            }
+        }
 
-	public class AdTransformValues
-	{
+        public void SimulateUpdate()
+        {
+			bool flag = !this.Effectparticlesystem.isPlaying;
+			if(flag)
+            {
+				this.Effectparticlesystem.Play();
+            }
+			bool isPlaying = this.Effectparticlesystem.isPlaying;
+			if(isPlaying)
+            {
+				this.Effectparticlesystem.Stop();
+            }
 
-		public void SetOnTransform(Transform t)
-		{
-			t.localPosition = this.Position;
-			t.localRotation = Quaternion.Euler(this.Rotation);
-			bool flag = this.hasScale;
-			if (flag)
+			if (EndEffectKey.IsPressed || EndEffectKey.EmulationPressed())
 			{
-				t.localScale = this.Scale;
-			}
+				EndEffectparticlesystem.Play();
+
+				EndEffectparticlesystem.Stop();
+				}
+
 		}
-
-
-		public void FlipTransform()
-		{
-			this.Position.x = -1f * this.Position.x;
-			this.Rotation.y = -1f * this.Rotation.y;
-			this.Scale.x = -1f * this.Scale.x;
-		}
-
-		public static implicit operator AdTransformValues(TransformValues transformV)
-		{
-			Modding.Serialization.Vector3 position = transformV.Position;
-			Modding.Serialization.Vector3 rotation = transformV.Rotation;
-			Modding.Serialization.Vector3 scale = transformV.Scale;
-			return new AdTransformValues
-			{
-				Position = position,
-				Rotation = rotation,
-				Scale = scale
-			};
-		}
-
-		// Token: 0x040003A7 RID: 935
-		public Modding.Serialization.Vector3 Position;
-
-		// Token: 0x040003A8 RID: 936
-		public Modding.Serialization.Vector3 Rotation;
-
-		// Token: 0x040003A9 RID: 937
-		public Modding.Serialization.Vector3 Scale;
-
-		// Token: 0x040003AA RID: 938
-		private bool hasScale = true;
+		
 	}
-
-
 }
