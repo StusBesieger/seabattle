@@ -12,7 +12,7 @@ using Modding.Serialization;
 using Modding.Modules;
 using Modding.Blocks;
 using skpCustomModule;
-
+using Vector3 = UnityEngine.Vector3;
 
 namespace StusNavalSpace
 {
@@ -25,10 +25,35 @@ namespace StusNavalSpace
 		[RequireToValidate]
 		public MKeyReference EndEffectKey;
 
-		[XmlElement("EffectPosition")]
-		[DefaultValue(null)]
-		[CanBeEmpty]
-		public TransformValues EffectPosition;
+		[XmlElement("EffectPositionX")]
+		[DefaultValue(0f)]
+		[Reloadable]
+		public MValueReference EffectPositionX;
+
+		[XmlElement("EffectPositionY")]
+		[DefaultValue(0f)]
+		[Reloadable]
+		public float EffectPositionY;
+
+		[XmlElement("EffectPositionZ")]
+		[DefaultValue(0f)]
+		[Reloadable]
+		public float EffectPositionZ;
+
+		[XmlElement("EffectRotationX")]
+		[DefaultValue(0f)]
+		[Reloadable]
+		public float EffectRotationX;
+
+		[XmlElement("EffectRotationY")]
+		[DefaultValue(0f)]
+		[Reloadable]
+		public float EffectRotationY;
+
+		[XmlElement("EffectRotationZ")]
+		[DefaultValue(0f)]
+		[Reloadable]
+		public float EffectRotationZ;
 	}
 	public class SNBEffectBehaviour : BlockModuleBehaviour<SNBEffectModule>
     {
@@ -41,29 +66,42 @@ namespace StusNavalSpace
 		public GameObject EndEffectObject;
 		public ParticleSystem Effectparticlesystem;
 		public ParticleSystem EndEffectparticlesystem;
-		private AdTransformValues EffectPosition = new AdTransformValues();
+		private float EffectPositionX;
+		private float EffectPositionY;
+		private float EffectPositionZ;
+		private float EffectRotationX;
+		private float EffectRotationY;
+		private float EffectRotationZ;
+
 		public override void OnSimulateStart()  //シミュ開始時
         {
+			//エフェクトの位置と回転を代入するための準備
+			Vector3 EffectPosition = new Vector3(EffectPositionX, EffectPositionY, EffectPositionZ);
+			Vector3 EffectRotation = new Vector3(EffectRotationX, EffectRotationY, EffectRotationZ);
 			//常時発生するエフェクトを取得・子オブジェクトとして初期化
 			EffectPrefab = Mod.modAssetBundle.LoadAsset<GameObject>("UsuallyEffect");
 			EffectObject = (GameObject)Instantiate(EffectPrefab, transform);
 			Effectparticlesystem = EffectObject.GetComponent<ParticleSystem>();
-			Effectparticlesystem.Stop();
-			EffectObject.transform.localPosition = EffectPosition.Position;
-			EffectObject.transform.localEulerAngles = EffectPosition.Rotation;
-			EffectObject.transform.localScale = EffectPosition.Scale;
+			EffectObject.transform.localPosition = EffectPosition;
+			EffectObject.transform.localRotation = Quaternion.Euler(EffectRotation);
 
 			//終了時に発生するエフェクトを取得・子オブジェクトとして初期化
 			EndEffectPrefab = Mod.modAssetBundle.LoadAsset<GameObject>("EndEffect");
 			EndEffectObject = (GameObject)Instantiate(EndEffectPrefab, transform);
 			EndEffectparticlesystem = EndEffectObject.GetComponent<ParticleSystem>();
 			EndEffectparticlesystem.Stop();
-			EndEffectObject.transform.localPosition = EffectPosition.Position;
-			EndEffectObject.transform.localEulerAngles = EffectPosition.Rotation;
-			EndEffectObject.transform.localScale = EffectPosition.Scale;
 
+			//それぞれのエフェクトの位置と回転を決定
+			EndEffectObject.transform.position = EffectPosition;
+			EndEffectObject.transform.rotation = Quaternion.Euler(EffectRotation);
 
+			Debug.Log("Effect"+ Effectparticlesystem);
+			Debug.Log("EndEffect" + EndEffectparticlesystem);
+			//常時発生するエフェクトのループをonにし、生成させる。
+			this.Effectparticlesystem.loop = true;
+			this.Effectparticlesystem.Play();
 		}
+		//キーの取得
         public override void SafeAwake()
         {
             base.SafeAwake();
@@ -71,35 +109,43 @@ namespace StusNavalSpace
 			try
             {
 				EndEffectKey = GetKey(Module.EndEffectKey);
+				Debug.Log("GetKey");
             }
             catch
             {
 				Mod.Error("BlockID" + blockID + "error");
             }
         }
-
-        public IEnumerator SimulateUpdate()
-        {
-			bool flag = !this.Effectparticlesystem.isPlaying;
-			if(flag)
-            {
-				this.Effectparticlesystem.Play();
-            }
-			yield return new WaitForSeconds(1f);
-			bool isPlaying = this.Effectparticlesystem.isPlaying;
-			if(isPlaying)
-            {
-				this.Effectparticlesystem.Stop();
-            }
+		//キーが押されている時終了エフェクト関数を呼び出す
+		public override void SimulateUpdateAlways()
+		{
+			base.SimulateUpdateAlways();
 
 			if (EndEffectKey.IsPressed || EndEffectKey.EmulationPressed())
 			{
-				EndEffectparticlesystem.Play();
-				yield return new WaitForSeconds(2f);
-				EndEffectparticlesystem.Stop();
+				StartCoroutine(PlayEndEffect());
+	
 			}
 
+		}	
+		//シミュ停止時に常時生成するエフェクトを終了させる
+		public override void OnSimulateStop()
+        {
+			this.Effectparticlesystem.Stop();
+			this.Effectparticlesystem.loop = false;
+			Debug.Log("Stop");
 		}
-		
+		//終了エフェクトの生成と常時発生エフェクトの停止
+		public IEnumerator PlayEndEffect()
+        {
+			Debug.Log("PlayEnd");
+			yield return new WaitForSeconds(1f);
+			EndEffectparticlesystem.Play();
+			yield return new WaitForSeconds(10f);
+			EndEffectparticlesystem.Stop();
+			this.Effectparticlesystem.Stop();
+			this.Effectparticlesystem.loop = false;
+			Debug.Log("Stop");
+		}
 	}
 }
