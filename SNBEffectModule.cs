@@ -28,7 +28,7 @@ namespace StusNavalSpace
 		[XmlElement("EffectPositionX")]
 		[DefaultValue(0f)]
 		[Reloadable]
-		public MValueReference EffectPositionX;
+		public float EffectPositionX;
 
 		[XmlElement("EffectPositionY")]
 		[DefaultValue(0f)]
@@ -76,8 +76,15 @@ namespace StusNavalSpace
 		public override void OnSimulateStart()  //シミュ開始時
         {
 			//エフェクトの位置と回転を代入するための準備
+			this.EffectPositionX = -Module.EffectPositionX;
+			this.EffectPositionY = Module.EffectPositionY;
+			this.EffectPositionZ = Module.EffectPositionZ;
+			this.EffectRotationX = Module.EffectRotationX;
+			this.EffectRotationY = -Module.EffectRotationY;
+			this.EffectRotationZ = Module.EffectRotationZ;
 			Vector3 EffectPosition = new Vector3(EffectPositionX, EffectPositionY, EffectPositionZ);
 			Vector3 EffectRotation = new Vector3(EffectRotationX, EffectRotationY, EffectRotationZ);
+
 			//常時発生するエフェクトを取得・子オブジェクトとして初期化
 			EffectPrefab = Mod.modAssetBundle.LoadAsset<GameObject>("UsuallyEffect");
 			EffectObject = (GameObject)Instantiate(EffectPrefab, transform);
@@ -90,13 +97,10 @@ namespace StusNavalSpace
 			EndEffectObject = (GameObject)Instantiate(EndEffectPrefab, transform);
 			EndEffectparticlesystem = EndEffectObject.GetComponent<ParticleSystem>();
 			EndEffectparticlesystem.Stop();
+			EndEffectObject.transform.localPosition = EffectPosition;
+			EndEffectObject.transform.localRotation = Quaternion.Euler(EffectRotation);
 
-			//それぞれのエフェクトの位置と回転を決定
-			EndEffectObject.transform.position = EffectPosition;
-			EndEffectObject.transform.rotation = Quaternion.Euler(EffectRotation);
 
-			Debug.Log("Effect"+ Effectparticlesystem);
-			Debug.Log("EndEffect" + EndEffectparticlesystem);
 			//常時発生するエフェクトのループをonにし、生成させる。
 			this.Effectparticlesystem.loop = true;
 			this.Effectparticlesystem.Play();
@@ -109,7 +113,6 @@ namespace StusNavalSpace
 			try
             {
 				EndEffectKey = GetKey(Module.EndEffectKey);
-				Debug.Log("GetKey");
             }
             catch
             {
@@ -133,19 +136,17 @@ namespace StusNavalSpace
         {
 			this.Effectparticlesystem.Stop();
 			this.Effectparticlesystem.loop = false;
-			Debug.Log("Stop");
 		}
 		//終了エフェクトの生成と常時発生エフェクトの停止
 		public IEnumerator PlayEndEffect()
         {
-			Debug.Log("PlayEnd");
 			yield return new WaitForSeconds(1f);
 			EndEffectparticlesystem.Play();
+			this.Effectparticlesystem.Stop();
+			yield return new WaitForSeconds(0.5f);
+			this.Effectparticlesystem.loop = false;
 			yield return new WaitForSeconds(10f);
 			EndEffectparticlesystem.Stop();
-			this.Effectparticlesystem.Stop();
-			this.Effectparticlesystem.loop = false;
-			Debug.Log("Stop");
 		}
 	}
 }
