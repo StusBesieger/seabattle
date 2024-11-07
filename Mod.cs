@@ -40,7 +40,8 @@ namespace StusNavalSpace
 			Modding.Modules.CustomModules.AddBlockModule<SNBUIModule, SNBUIBehaviour>("SNBUIModule", true);
 			Modding.Modules.CustomModules.AddBlockModule<SNBAmmoUIModule, SNBAmmoUIBehaviour>("SNBAmmoUIModule", true);
 			Modding.Modules.CustomModules.AddBlockModule<SNBAdWeaponConfigModule, SNBAdWeaponConfigBehaviour>("SNBAdWeaponConfigModule", true);
-
+			Modding.Modules.CustomModules.AddBlockModule<SNBEffectModule, SNBEffectBehaviour>("SNBEffectModule", true);
+			Modding.Modules.CustomModules.AddBlockModule<SNBAdTropedConfiModule, SNBTropedBehaviour>("SNBAdTropedConfiModule", true);
 
 			HPDict = new Dictionary<int, int> { };
 

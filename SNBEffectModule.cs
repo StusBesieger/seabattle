@@ -25,6 +25,16 @@ namespace StusNavalSpace
 		[RequireToValidate]
 		public MKeyReference EndEffectKey;
 
+		[XmlElement("LoopEffectAssetBundleName")]
+		[DefaultValue(null)]
+		[CanBeEmpty]
+		public string SNBLoopAssetBundleName;
+
+		[XmlElement("EndEffectAssetBundleName")]
+		[DefaultValue(null)]
+		[CanBeEmpty]
+		public string SNBEndAssetBundleName;
+
 		[XmlElement("EffectPositionX")]
 		[DefaultValue(0f)]
 		[Reloadable]
@@ -54,10 +64,27 @@ namespace StusNavalSpace
 		[DefaultValue(0f)]
 		[Reloadable]
 		public float EffectRotationZ;
+
+		//[XmlElement("EffectScaleX")]
+		//[DefaultValue(0f)]
+		//[Reloadable]
+		//public float EffectScaleX;
+
+		//[XmlElement("EffectScaleY")]
+		//[DefaultValue(0f)]
+		//[Reloadable]
+		//public float EffectScaleY;
+
+		//[XmlElement("EffectScaleZ")]
+		//[DefaultValue(0f)]
+		//[Reloadable]
+		//public float EffectScaleZ;
 	}
 	public class SNBEffectBehaviour : BlockModuleBehaviour<SNBEffectModule>
     {
 		public int blockID;
+		public string SNBLoopAssetBundleName;
+		public string SNBEndAssetBundleName;
 		public MKey EndEffectKey;
 		public Transform effectposition;
 		public GameObject EffectPrefab;
@@ -72,34 +99,49 @@ namespace StusNavalSpace
 		private float EffectRotationX;
 		private float EffectRotationY;
 		private float EffectRotationZ;
-
+		//private float EffectScaleX;
+		//private float EffectScaleY;
+		//private float EffectScaleZ;
 		public override void OnSimulateStart()  //シミュ開始時
         {
 			//エフェクトの位置と回転を代入するための準備
 			this.EffectPositionX = -Module.EffectPositionX;
 			this.EffectPositionY = Module.EffectPositionY;
 			this.EffectPositionZ = Module.EffectPositionZ;
+
 			this.EffectRotationX = Module.EffectRotationX;
 			this.EffectRotationY = -Module.EffectRotationY;
 			this.EffectRotationZ = Module.EffectRotationZ;
+
+			//this.EffectScaleX = -Module.EffectScaleX;
+			//this.EffectScaleY = Module.EffectScaleY;
+			//this.EffectScaleZ = Module.EffectScaleZ;
+
+			this.SNBLoopAssetBundleName = Module.SNBLoopAssetBundleName;
+			this.SNBEndAssetBundleName = Module.SNBEndAssetBundleName;
+
 			Vector3 EffectPosition = new Vector3(EffectPositionX, EffectPositionY, EffectPositionZ);
 			Vector3 EffectRotation = new Vector3(EffectRotationX, EffectRotationY, EffectRotationZ);
+			//Vector3 EffectScale = new Vector3(EffectScaleX, EffectScaleY, EffectScaleZ);
 
 			//常時発生するエフェクトを取得・子オブジェクトとして初期化
-			EffectPrefab = Mod.modAssetBundle.LoadAsset<GameObject>("UsuallyEffect");
+			EffectPrefab = Mod.modAssetBundle.LoadAsset<GameObject>(SNBLoopAssetBundleName);
 			EffectObject = (GameObject)Instantiate(EffectPrefab, transform);
 			Effectparticlesystem = EffectObject.GetComponent<ParticleSystem>();
 			EffectObject.transform.localPosition = EffectPosition;
 			EffectObject.transform.localRotation = Quaternion.Euler(EffectRotation);
 
 			//終了時に発生するエフェクトを取得・子オブジェクトとして初期化
-			EndEffectPrefab = Mod.modAssetBundle.LoadAsset<GameObject>("EndEffect");
+			EndEffectPrefab = Mod.modAssetBundle.LoadAsset<GameObject>(SNBEndAssetBundleName);
 			EndEffectObject = (GameObject)Instantiate(EndEffectPrefab, transform);
 			EndEffectparticlesystem = EndEffectObject.GetComponent<ParticleSystem>();
 			EndEffectparticlesystem.Stop();
 			EndEffectObject.transform.localPosition = EffectPosition;
 			EndEffectObject.transform.localRotation = Quaternion.Euler(EffectRotation);
 
+			//エフェクトのローカルスケール変更
+			//this.Effectparticlesystem.transform. = EffectScale;
+			//this.EndEffectparticlesystem.transform.localScale = EffectScale;
 
 			//常時発生するエフェクトのループをonにし、生成させる。
 			this.Effectparticlesystem.loop = true;
