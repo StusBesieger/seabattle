@@ -44,7 +44,6 @@ namespace StusNavalSpace
 
     public class SNBUIBehaviour : BlockModuleBehaviour<SNBUIModule>
     {
-
         public Font Orbitron;   //AssetBundleに追加したフォント、Orbiton Medium
         public Font Arial;  //Unityのデフォルトのフォント
         public GameObject ExplodePrefab;
@@ -130,7 +129,7 @@ namespace StusNavalSpace
             particlesystem = ExplodeObject.GetComponent<ParticleSystem>();
             particlesystem.Stop();
             ExplodeObject.transform.position = BlockBehaviour.GetCenter();
-
+            
             //HPcoreの接続を取得
             joint = GetComponent<Joint>();
 

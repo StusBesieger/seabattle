@@ -53,21 +53,20 @@ namespace StusNavalSpace
             base.OnSimulateStart();
 
             adshootingbehavour = GetComponent<AdShootingBehavour>();
-            Debug.Log(adshootingbehavour);
+            
             damageslider = GetSlider(Module.DamageSlider);
-            Debug.Log(damageslider);
+            
             Damage = (int)damageslider.Value;
             
             radiusslider = GetSlider(Module.RadiusSlider);
-            Debug.Log(radiusslider);
+
             Radius = (int)radiusslider.Value;
-            
-            
+
+
             //総弾数を調整
             ammoslider = GetSlider(Module.AmmoSlider);
-            Debug.Log(ammoslider);
             ammo = (int)ammoslider.Value;
-            
+
 
             if (adshootingbehavour.AmmoStock != 0)  //マガジンの弾数を見てマガジンを使っているか判断
             {

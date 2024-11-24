@@ -65,20 +65,6 @@ namespace StusNavalSpace
 		[Reloadable]
 		public float EffectRotationZ;
 
-		//[XmlElement("EffectScaleX")]
-		//[DefaultValue(0f)]
-		//[Reloadable]
-		//public float EffectScaleX;
-
-		//[XmlElement("EffectScaleY")]
-		//[DefaultValue(0f)]
-		//[Reloadable]
-		//public float EffectScaleY;
-
-		//[XmlElement("EffectScaleZ")]
-		//[DefaultValue(0f)]
-		//[Reloadable]
-		//public float EffectScaleZ;
 	}
 	public class SNBEffectBehaviour : BlockModuleBehaviour<SNBEffectModule>
     {
@@ -99,9 +85,6 @@ namespace StusNavalSpace
 		private float EffectRotationX;
 		private float EffectRotationY;
 		private float EffectRotationZ;
-		//private float EffectScaleX;
-		//private float EffectScaleY;
-		//private float EffectScaleZ;
 		public override void OnSimulateStart()  //シミュ開始時
         {
 			//エフェクトの位置と回転を代入するための準備
@@ -113,16 +96,12 @@ namespace StusNavalSpace
 			this.EffectRotationY = -Module.EffectRotationY;
 			this.EffectRotationZ = Module.EffectRotationZ;
 
-			//this.EffectScaleX = -Module.EffectScaleX;
-			//this.EffectScaleY = Module.EffectScaleY;
-			//this.EffectScaleZ = Module.EffectScaleZ;
 
 			this.SNBLoopAssetBundleName = Module.SNBLoopAssetBundleName;
 			this.SNBEndAssetBundleName = Module.SNBEndAssetBundleName;
 
 			Vector3 EffectPosition = new Vector3(EffectPositionX, EffectPositionY, EffectPositionZ);
 			Vector3 EffectRotation = new Vector3(EffectRotationX, EffectRotationY, EffectRotationZ);
-			//Vector3 EffectScale = new Vector3(EffectScaleX, EffectScaleY, EffectScaleZ);
 
 			//常時発生するエフェクトを取得・子オブジェクトとして初期化
 			EffectPrefab = Mod.modAssetBundle.LoadAsset<GameObject>(SNBLoopAssetBundleName);
@@ -138,10 +117,6 @@ namespace StusNavalSpace
 			EndEffectparticlesystem.Stop();
 			EndEffectObject.transform.localPosition = EffectPosition;
 			EndEffectObject.transform.localRotation = Quaternion.Euler(EffectRotation);
-
-			//エフェクトのローカルスケール変更
-			//this.Effectparticlesystem.transform. = EffectScale;
-			//this.EndEffectparticlesystem.transform.localScale = EffectScale;
 
 			//常時発生するエフェクトのループをonにし、生成させる。
 			this.Effectparticlesystem.loop = true;
